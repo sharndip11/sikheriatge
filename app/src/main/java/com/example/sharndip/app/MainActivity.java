@@ -1,5 +1,7 @@
 package com.example.sharndip.app;
 
+import android.content.pm.ActivityInfo;
+import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -14,6 +16,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import java.util.ArrayList;
@@ -22,52 +25,62 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private DrawerLayout drawerLayout;
-    private ListView navList;
-    private FragmentTransaction fragmentTransaction;
-    private FragmentManager fragmentManager;
-
-    //Animation fade_in, fade_out;
-    //ViewFlipper viewFlipper;
+    private static ListView navList;
+    private static FragmentTransaction fragmentTransaction;
+    private static FragmentManager fragmentManager;
+    public boolean _bool = true;
+    boolean doubleBackToExitPressedOnce = false;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onBackPressed() {                                                                 //GESTION DE L'ACTION DU BOUTON "RETOUR"
+        if (R.layout.fragment_gursikh_jeevan != 0||
+                R.layout.fragment_histoire != 0 ||
+                R.layout.fragment_biographies != 0 ||
+                R.layout.fragment_gurdwara != 0 ||
+                R.layout.fragment_faq != 0 ||
+                R.layout.fragment_quizz != 0 ||
+                R.layout.fragment_actualite != 0) {
+            MainActivity.loadSelection(0);
+            _bool = false;
+        }
+
+        if (_bool == false) {
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                _bool = true;
+                return;
+            }
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Double taper pour fermer", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce=false;
+                }
+            }, 500);
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {                            //CREATION DE LA LISTVIEW QUI CONTIENDRA LES DIFFERENTES RUBRIQUE DU MENU LATERAL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        //carousel
-        //viewFlipper = (ViewFlipper) this.findViewById(R.id.backgroundViewFlipper1);
-
-        //fade_in = AnimationUtils.loadAnimation(this,
-                //android.R.anim.fade_in);
-        //fade_out = AnimationUtils.loadAnimation(this,
-                //android.R.anim.fade_out);
-
-        //viewFlipper.setInAnimation(fade_in);
-        //viewFlipper.setOutAnimation(fade_out);
-
-        //Automatique
-        //viewFlipper.setAutoStart(true);
-        //viewFlipper.setFlipInterval(5000);
-        //viewFlipper.startFlipping();
-
-        //...............................
 
         //menu
         drawerLayout = (DrawerLayout)findViewById(R.id.drawerLayout);
 
         navList = (ListView)findViewById(R.id.navList);
         ArrayList<String> navArray = new ArrayList<String>();
-        navArray.add("Home");
-        navArray.add("Gursikh Jeevan");
+        navArray.add("Accueil");
+        navArray.add("Vie d'un Sikh");
         navArray.add("Histoire");
-        navArray.add("Fakre Kaum");
-        navArray.add("Gurdwara");
         navArray.add("Biographies");
+        navArray.add("Temples");
         navArray.add("FAQ");
         navArray.add("Quizz");
-        navArray.add("Actualité");
-        navArray.add("Caricatures");
+        navArray.add("Actualités");
         navList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_activated_1,navArray);
         navList.setAdapter(adapter);
@@ -87,8 +100,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    private void loadSelection(int i){
-
+    public static void loadSelection(int i){                                                //SELECTEUR DE RUBRIQUE DEPUIS LA LISTVIEW CREE PRECEDEMENT
         navList.setItemChecked(i,true);
 
         switch (i) {
@@ -113,10 +125,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 fragmentTransaction.commit();
                 break;
 
-            case  3:
-                FakreKaumFragment fakreKaumFragment = new FakreKaumFragment();
+            case 3:
+                BiographiesFragment biographiesFragment = new BiographiesFragment();
                 fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragmentHolder,fakreKaumFragment);
+                fragmentTransaction.replace(R.id.fragmentHolder,biographiesFragment);
                 fragmentTransaction.commit();
                 break;
 
@@ -128,40 +140,25 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 break;
 
             case 5:
-                BiographiesFragment biographiesFragment = new BiographiesFragment();
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragmentHolder,biographiesFragment);
-                fragmentTransaction.commit();
-                break;
-
-            case 6:
                 FaqFragment faqFragment = new FaqFragment();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentHolder,faqFragment);
                 fragmentTransaction.commit();
                 break;
 
-            case 7:
+            case 6:
                 QuizzFragment quizzFragment = new QuizzFragment();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentHolder,quizzFragment);
                 fragmentTransaction.commit();
                 break;
 
-            case 8:
+            case 7:
                 ActualiteFragment actualiteFragment = new ActualiteFragment();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragmentHolder,actualiteFragment);
                 fragmentTransaction.commit();
                 break;
-
-            case 9:
-                CaricaturesFragment caricaturesFragment = new CaricaturesFragment();
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragmentHolder,caricaturesFragment);
-                fragmentTransaction.commit();
-                break;
-
         }
 
     }
@@ -189,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {              //ACTION LORS DU CLIQUE SUR UNE RUBRIQUE
 
         loadSelection(position);
 
